@@ -1,0 +1,1108 @@
+.class public abstract Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;
+.super Ljava/lang/Object;
+.source "V4SchemeSigner.java"
+
+
+# direct methods
+.method private constructor <init>()V
+    .registers 1
+
+    .line 70
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    .line 71
+    return-void
+.end method
+
+.method private static convertToV4HashingInfo(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;)Lcom/android/apksig/internal/util/Pair;
+    .registers 3
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "(",
+            "Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;",
+            ")",
+            "Lcom/android/apksig/internal/util/Pair",
+            "<",
+            "Ljava/lang/Integer;",
+            "Ljava/lang/Byte;",
+            ">;"
+        }
+    .end annotation
+
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/security/NoSuchAlgorithmException;
+        }
+    .end annotation
+
+    .line 346
+    sget-object v0, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner$1;->$SwitchMap$com$android$apksig$internal$apk$ContentDigestAlgorithm:[I
+
+    invoke-virtual {p0}, Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;->ordinal()I
+
+    move-result v1
+
+    aget v0, v0, v1
+
+    packed-switch v0, :pswitch_data_24
+
+    .line 351
+    new-instance v0, Ljava/security/NoSuchAlgorithmException;
+
+    const-string v1, "Invalid hash algorithm, only SHA2-256 over 4 KB chunks supported."
+
+    invoke-direct {v0, v1}, Ljava/security/NoSuchAlgorithmException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 348
+    :pswitch_13  #0x2
+    const/4 v0, 0x1
+
+    invoke-static {v0}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
+
+    move-result-object v0
+
+    const/16 v1, 0xc
+
+    invoke-static {v1}, Ljava/lang/Byte;->valueOf(B)Ljava/lang/Byte;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Lcom/android/apksig/internal/util/Pair;->of(Ljava/lang/Object;Ljava/lang/Object;)Lcom/android/apksig/internal/util/Pair;
+
+    move-result-object v0
+
+    return-object v0
+
+    .line 346
+    nop
+
+    :pswitch_data_24
+    .packed-switch 0x2
+        :pswitch_13  #00000002
+    .end packed-switch
+.end method
+
+.method public static digestAlgorithmSortingOrder(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;)I
+    .registers 3
+
+    .line 318
+    sget-object v0, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner$1;->$SwitchMap$com$android$apksig$internal$apk$ContentDigestAlgorithm:[I
+
+    invoke-virtual {p0}, Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;->ordinal()I
+
+    move-result v1
+
+    aget v0, v0, v1
+
+    packed-switch v0, :pswitch_data_14
+
+    .line 326
+    const/4 v0, -0x1
+
+    :goto_c
+    return v0
+
+    .line 320
+    :pswitch_d  #0x1
+    const/4 v0, 0x0
+
+    goto :goto_c
+
+    .line 322
+    :pswitch_f  #0x2
+    const/4 v0, 0x1
+
+    goto :goto_c
+
+    .line 324
+    :pswitch_11  #0x3
+    const/4 v0, 0x2
+
+    goto :goto_c
+
+    .line 318
+    nop
+
+    :pswitch_data_14
+    .packed-switch 0x1
+        :pswitch_d  #00000001
+        :pswitch_f  #00000002
+        :pswitch_11  #00000003
+    .end packed-switch
+.end method
+
+.method private static generateSignature(Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;Lcom/android/apksig/internal/apk/v4/V4Signature$HashingInfo;[B[BJ)Lcom/android/apksig/internal/apk/v4/V4Signature;
+    .registers 16
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/security/NoSuchAlgorithmException;,
+            Ljava/security/InvalidKeyException;,
+            Ljava/security/SignatureException;,
+            Ljava/security/cert/CertificateEncodingException;
+        }
+    .end annotation
+
+    const/4 v9, 0x1
+
+    const/4 v8, 0x0
+
+    .line 158
+    iget-object v0, p0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;->certificates:Ljava/util/List;
+
+    invoke-interface {v0}, Ljava/util/List;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_12
+
+    .line 159
+    new-instance v0, Ljava/security/SignatureException;
+
+    const-string v1, "No certificates configured for signer"
+
+    invoke-direct {v0, v1}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 161
+    :cond_12
+    iget-object v0, p0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;->certificates:Ljava/util/List;
+
+    invoke-interface {v0}, Ljava/util/List;->size()I
+
+    move-result v0
+
+    if-eq v0, v9, :cond_22
+
+    .line 162
+    new-instance v0, Ljava/security/cert/CertificateEncodingException;
+
+    const-string v1, "Should only have one certificate"
+
+    invoke-direct {v0, v1}, Ljava/security/cert/CertificateEncodingException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 166
+    :cond_22
+    iget-object v0, p0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;->certificates:Ljava/util/List;
+
+    invoke-interface {v0, v8}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Ljava/security/cert/X509Certificate;
+
+    invoke-virtual {v0}, Ljava/security/cert/X509Certificate;->getPublicKey()Ljava/security/PublicKey;
+
+    move-result-object v7
+
+    .line 168
+    iget-object v0, p0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;->certificates:Ljava/util/List;
+
+    invoke-static {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils;->encodeCertificates(Ljava/util/List;)Ljava/util/List;
+
+    move-result-object v0
+
+    .line 169
+    invoke-interface {v0, v8}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v2
+
+    check-cast v2, [B
+
+    .line 171
+    new-instance v0, Lcom/android/apksig/internal/apk/v4/V4Signature$SigningInfo;
+
+    invoke-interface {v7}, Ljava/security/PublicKey;->getEncoded()[B
+
+    move-result-object v4
+
+    const/4 v5, -0x1
+
+    const/4 v6, 0x0
+
+    move-object v1, p2
+
+    move-object v3, p3
+
+    invoke-direct/range {v0 .. v6}, Lcom/android/apksig/internal/apk/v4/V4Signature$SigningInfo;-><init>([B[B[B[BI[B)V
+
+    .line 174
+    invoke-static {p4, p5, p1, v0}, Lcom/android/apksig/internal/apk/v4/V4Signature;->getSignedData(JLcom/android/apksig/internal/apk/v4/V4Signature$HashingInfo;Lcom/android/apksig/internal/apk/v4/V4Signature$SigningInfo;)[B
+
+    move-result-object v0
+
+    .line 179
+    invoke-static {p0, v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils;->generateSignaturesOverData(Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;[B)Ljava/util/List;
+
+    move-result-object v1
+
+    .line 180
+    invoke-interface {v1}, Ljava/util/List;->size()I
+
+    move-result v0
+
+    if-eq v0, v9, :cond_5d
+
+    .line 181
+    new-instance v0, Ljava/security/SignatureException;
+
+    const-string v1, "Should only be one signature generated"
+
+    invoke-direct {v0, v1}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 184
+    :cond_5d
+    invoke-interface {v1, v8}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/util/Pair;
+
+    invoke-virtual {v0}, Lcom/android/apksig/internal/util/Pair;->getFirst()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Ljava/lang/Integer;
+
+    invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+
+    move-result v5
+
+    .line 185
+    invoke-interface {v1, v8}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/util/Pair;
+
+    invoke-virtual {v0}, Lcom/android/apksig/internal/util/Pair;->getSecond()Ljava/lang/Object;
+
+    move-result-object v6
+
+    check-cast v6, [B
+
+    .line 187
+    new-instance v0, Lcom/android/apksig/internal/apk/v4/V4Signature$SigningInfo;
+
+    invoke-interface {v7}, Ljava/security/PublicKey;->getEncoded()[B
+
+    move-result-object v4
+
+    move-object v1, p2
+
+    move-object v3, p3
+
+    invoke-direct/range {v0 .. v6}, Lcom/android/apksig/internal/apk/v4/V4Signature$SigningInfo;-><init>([B[B[B[BI[B)V
+
+    .line 191
+    invoke-virtual {p1}, Lcom/android/apksig/internal/apk/v4/V4Signature$HashingInfo;->toByteArray()[B
+
+    move-result-object v1
+
+    .line 192
+    new-instance v2, Lcom/android/apksig/internal/apk/v4/V4Signature;
+
+    const/4 v3, 0x2
+
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/v4/V4Signature$SigningInfo;->toByteArray()[B
+
+    move-result-object v0
+
+    invoke-direct {v2, v3, v1, v0}, Lcom/android/apksig/internal/apk/v4/V4Signature;-><init>(I[B[B)V
+
+    .line 191
+    return-object v2
+.end method
+
+.method public static generateV4Signature(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;)Lcom/android/apksig/internal/util/Pair;
+    .registers 12
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "(",
+            "Lcom/android/apksig/util/DataSource;",
+            "Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;",
+            ")",
+            "Lcom/android/apksig/internal/util/Pair",
+            "<",
+            "Lcom/android/apksig/internal/apk/v4/V4Signature;",
+            "[B>;"
+        }
+    .end annotation
+
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/io/IOException;,
+            Ljava/security/InvalidKeyException;,
+            Ljava/security/NoSuchAlgorithmException;
+        }
+    .end annotation
+
+    const/4 v9, 0x0
+
+    .line 116
+    invoke-interface {p0}, Lcom/android/apksig/util/DataSource;->size()J
+
+    move-result-wide v4
+
+    .line 123
+    invoke-static {p0}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->getApkDigest(Lcom/android/apksig/util/DataSource;)[B
+
+    move-result-object v2
+
+    .line 127
+    invoke-static {p0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils;->computeChunkVerityTreeAndDigest(Lcom/android/apksig/util/DataSource;)Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$VerityTreeAndDigest;
+
+    move-result-object v0
+
+    .line 129
+    iget-object v1, v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$VerityTreeAndDigest;->contentDigestAlgorithm:Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;
+
+    .line 131
+    iget-object v3, v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$VerityTreeAndDigest;->rootHash:[B
+
+    .line 132
+    iget-object v6, v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$VerityTreeAndDigest;->tree:[B
+
+    .line 134
+    invoke-static {v1}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->convertToV4HashingInfo(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;)Lcom/android/apksig/internal/util/Pair;
+
+    move-result-object v7
+
+    .line 136
+    new-instance v1, Lcom/android/apksig/internal/apk/v4/V4Signature$HashingInfo;
+
+    invoke-virtual {v7}, Lcom/android/apksig/internal/util/Pair;->getFirst()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Ljava/lang/Integer;
+
+    invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+
+    move-result v8
+
+    invoke-virtual {v7}, Lcom/android/apksig/internal/util/Pair;->getSecond()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Ljava/lang/Byte;
+
+    invoke-virtual {v0}, Ljava/lang/Byte;->byteValue()B
+
+    move-result v0
+
+    invoke-direct {v1, v8, v0, v9, v3}, Lcom/android/apksig/internal/apk/v4/V4Signature$HashingInfo;-><init>(IB[B[B)V
+
+    .line 143
+    const/4 v3, 0x0
+
+    move-object v0, p1
+
+    :try_start_32
+    invoke-static/range {v0 .. v5}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->generateSignature(Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;Lcom/android/apksig/internal/apk/v4/V4Signature$HashingInfo;[B[BJ)Lcom/android/apksig/internal/apk/v4/V4Signature;
+    :try_end_35
+    .catch Ljava/security/InvalidKeyException; {:try_start_32 .. :try_end_35} :catch_3b
+    .catch Ljava/security/SignatureException; {:try_start_32 .. :try_end_35} :catch_44
+    .catch Ljava/security/cert/CertificateEncodingException; {:try_start_32 .. :try_end_35} :catch_46
+
+    move-result-object v0
+
+    .line 149
+    invoke-static {v0, v6}, Lcom/android/apksig/internal/util/Pair;->of(Ljava/lang/Object;Ljava/lang/Object;)Lcom/android/apksig/internal/util/Pair;
+
+    move-result-object v0
+
+    return-object v0
+
+    .line 145
+    :catch_3b
+    move-exception v0
+
+    .line 146
+    :goto_3c
+    new-instance v1, Ljava/security/InvalidKeyException;
+
+    const-string v2, "Signer failed"
+
+    invoke-direct {v1, v2, v0}, Ljava/security/InvalidKeyException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
+
+    throw v1
+
+    .line 145
+    :catch_44
+    move-exception v0
+
+    goto :goto_3c
+
+    :catch_46
+    move-exception v0
+
+    goto :goto_3c
+.end method
+
+.method public static generateV4Signature(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;Ljava/io/File;)V
+    .registers 6
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/io/IOException;,
+            Ljava/security/InvalidKeyException;,
+            Ljava/security/NoSuchAlgorithmException;
+        }
+    .end annotation
+
+    .line 100
+    invoke-static {p0, p1}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->generateV4Signature(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$SignerConfig;)Lcom/android/apksig/internal/util/Pair;
+
+    move-result-object v1
+
+    .line 101
+    :try_start_4
+    new-instance v2, Ljava/io/FileOutputStream;
+
+    invoke-direct {v2, p2}, Ljava/io/FileOutputStream;-><init>(Ljava/io/File;)V
+    :try_end_9
+    .catch Ljava/io/IOException; {:try_start_4 .. :try_end_9} :catch_24
+
+    .line 102
+    :try_start_9
+    invoke-virtual {v1}, Lcom/android/apksig/internal/util/Pair;->getFirst()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/apk/v4/V4Signature;
+
+    invoke-virtual {v0, v2}, Lcom/android/apksig/internal/apk/v4/V4Signature;->writeTo(Ljava/io/OutputStream;)V
+
+    .line 103
+    invoke-virtual {v1}, Lcom/android/apksig/internal/util/Pair;->getSecond()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, [B
+
+    invoke-static {v2, v0}, Lcom/android/apksig/internal/apk/v4/V4Signature;->writeBytes(Ljava/io/OutputStream;[B)V
+    :try_end_1b
+    .catch Ljava/lang/Throwable; {:try_start_9 .. :try_end_1b} :catch_1f
+    .catch Ljava/io/IOException; {:try_start_9 .. :try_end_1b} :catch_24
+
+    .line 104
+    :try_start_1b
+    invoke-virtual {v2}, Ljava/io/OutputStream;->close()V
+    :try_end_1e
+    .catch Ljava/io/IOException; {:try_start_1b .. :try_end_1e} :catch_24
+
+    .line 108
+    return-void
+
+    .line 101
+    :catch_1f
+    move-exception v0
+
+    :try_start_20
+    invoke-virtual {v2}, Ljava/io/OutputStream;->close()V
+    :try_end_23
+    .catch Ljava/lang/Throwable; {:try_start_20 .. :try_end_23} :catch_29
+    .catch Ljava/io/IOException; {:try_start_20 .. :try_end_23} :catch_24
+
+    :goto_23
+    :try_start_23
+    throw v0
+    :try_end_24
+    .catch Ljava/io/IOException; {:try_start_23 .. :try_end_24} :catch_24
+
+    .line 104
+    :catch_24
+    move-exception v0
+
+    .line 105
+    invoke-virtual {p2}, Ljava/io/File;->delete()Z
+
+    .line 106
+    throw v0
+
+    .line 101
+    :catch_29
+    move-exception v1
+
+    :try_start_2a
+    invoke-virtual {v0, v1}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V
+    :try_end_2d
+    .catch Ljava/io/IOException; {:try_start_2a .. :try_end_2d} :catch_24
+
+    goto :goto_23
+.end method
+
+.method private static getApkDigest(Lcom/android/apksig/util/DataSource;)[B
+    .registers 3
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/io/IOException;
+        }
+    .end annotation
+
+    new-instance v0, Ljava/lang/RuntimeException;
+
+    const-string v1, "Couldn\'t be decompiled."
+
+    invoke-direct {v0, v1}, Ljava/lang/RuntimeException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+.end method
+
+.method private static getBestV2Digest(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/apk/ApkUtils$ZipSections;)[B
+    .registers 10
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/security/SignatureException;
+        }
+    .end annotation
+
+    const/4 v7, 0x1
+
+    .line 255
+    new-instance v1, Ljava/util/HashSet;
+
+    invoke-direct {v1, v7}, Ljava/util/HashSet;-><init>(I)V
+
+    .line 256
+    new-instance v3, Ljava/util/HashSet;
+
+    invoke-direct {v3, v7}, Ljava/util/HashSet;-><init>(I)V
+
+    .line 257
+    new-instance v6, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;
+
+    const/4 v0, 0x2
+
+    invoke-direct {v6, v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;-><init>(I)V
+
+    .line 260
+    const v0, 0x7109871a
+
+    :try_start_14
+    invoke-static {p0, p1, v0, v6}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils;->findSignature(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/apk/ApkUtils$ZipSections;ILcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;)Lcom/android/apksig/internal/apk/SignatureInfo;
+
+    move-result-object v0
+
+    .line 263
+    iget-object v0, v0, Lcom/android/apksig/internal/apk/SignatureInfo;->signatureBlock:Ljava/nio/ByteBuffer;
+
+    .line 267
+    invoke-static {}, Ljava/util/Collections;->emptyMap()Ljava/util/Map;
+
+    move-result-object v2
+
+    .line 264
+    const v4, 0x7fffffff
+
+    const v5, 0x7fffffff
+
+    invoke-static/range {v0 .. v6}, Lcom/android/apksig/internal/apk/v2/V2SchemeVerifier;->parseSigners(Ljava/nio/ByteBuffer;Ljava/util/Set;Ljava/util/Map;Ljava/util/Set;IILcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;)V
+    :try_end_27
+    .catch Ljava/lang/Exception; {:try_start_14 .. :try_end_27} :catch_4c
+
+    .line 276
+    iget-object v0, v6, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->signers:Ljava/util/List;
+
+    invoke-interface {v0}, Ljava/util/List;->size()I
+
+    move-result v0
+
+    if-eq v0, v7, :cond_55
+
+    .line 277
+    new-instance v0, Ljava/security/SignatureException;
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v2, "Should only have one signer, errors: "
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v6}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->getErrors()Ljava/util/List;
+
+    move-result-object v2
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-direct {v0, v1}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 272
+    :catch_4c
+    move-exception v0
+
+    .line 273
+    new-instance v1, Ljava/security/SignatureException;
+
+    const-string v2, "Failed to extract and parse v2 block"
+
+    invoke-direct {v1, v2, v0}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
+
+    throw v1
+
+    .line 280
+    :cond_55
+    iget-object v0, v6, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->signers:Ljava/util/List;
+
+    const/4 v1, 0x0
+
+    invoke-interface {v0, v1}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;
+
+    .line 281
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;->containsErrors()Z
+
+    move-result v1
+
+    if-eqz v1, :cond_81
+
+    .line 282
+    new-instance v1, Ljava/security/SignatureException;
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v3, "Parsing failed: "
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;->getErrors()Ljava/util/List;
+
+    move-result-object v0
+
+    invoke-virtual {v2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-direct {v1, v0}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v1
+
+    .line 285
+    :cond_81
+    iget-object v0, v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;->contentDigests:Ljava/util/List;
+
+    .line 287
+    invoke-static {v0}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->pickBestDigest(Ljava/util/List;)[B
+
+    move-result-object v0
+
+    return-object v0
+.end method
+
+.method private static getBestV3Digest(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/apk/ApkUtils$ZipSections;)[B
+    .registers 7
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/security/SignatureException;
+        }
+    .end annotation
+
+    const/4 v4, 0x1
+
+    const/4 v3, 0x0
+
+    .line 225
+    new-instance v0, Ljava/util/HashSet;
+
+    invoke-direct {v0, v4}, Ljava/util/HashSet;-><init>(I)V
+
+    .line 226
+    new-instance v1, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;
+
+    const/4 v2, 0x3
+
+    invoke-direct {v1, v2}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;-><init>(I)V
+
+    .line 229
+    const v2, -0xfac9740
+
+    :try_start_10
+    invoke-static {p0, p1, v2, v1}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils;->findSignature(Lcom/android/apksig/util/DataSource;Lcom/android/apksig/apk/ApkUtils$ZipSections;ILcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;)Lcom/android/apksig/internal/apk/SignatureInfo;
+
+    move-result-object v2
+
+    .line 232
+    iget-object v2, v2, Lcom/android/apksig/internal/apk/SignatureInfo;->signatureBlock:Ljava/nio/ByteBuffer;
+
+    .line 233
+    invoke-static {v2, v0, v1}, Lcom/android/apksig/internal/apk/v3/V3SchemeVerifier;->parseSigners(Ljava/nio/ByteBuffer;Ljava/util/Set;Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;)V
+    :try_end_19
+    .catch Ljava/lang/Exception; {:try_start_10 .. :try_end_19} :catch_3e
+
+    .line 239
+    iget-object v0, v1, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->signers:Ljava/util/List;
+
+    invoke-interface {v0}, Ljava/util/List;->size()I
+
+    move-result v0
+
+    if-eq v0, v4, :cond_47
+
+    .line 240
+    new-instance v0, Ljava/security/SignatureException;
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v3, "Should only have one signer, errors: "
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    invoke-virtual {v1}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->getErrors()Ljava/util/List;
+
+    move-result-object v1
+
+    invoke-virtual {v2, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-direct {v0, v1}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 235
+    :catch_3e
+    move-exception v0
+
+    .line 236
+    new-instance v1, Ljava/security/SignatureException;
+
+    const-string v2, "Failed to extract and parse v3 block"
+
+    invoke-direct {v1, v2, v0}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
+
+    throw v1
+
+    .line 243
+    :cond_47
+    iget-object v0, v1, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->signers:Ljava/util/List;
+
+    invoke-interface {v0, v3}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;
+
+    .line 244
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;->containsErrors()Z
+
+    move-result v2
+
+    if-eqz v2, :cond_72
+
+    .line 245
+    new-instance v1, Ljava/security/SignatureException;
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v3, "Parsing failed: "
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;->getErrors()Ljava/util/List;
+
+    move-result-object v0
+
+    invoke-virtual {v2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-direct {v1, v0}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v1
+
+    .line 248
+    :cond_72
+    iget-object v0, v1, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result;->signers:Ljava/util/List;
+
+    .line 249
+    invoke-interface {v0, v3}, Ljava/util/List;->get(I)Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;
+
+    iget-object v0, v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo;->contentDigests:Ljava/util/List;
+
+    .line 250
+    invoke-static {v0}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->pickBestDigest(Ljava/util/List;)[B
+
+    move-result-object v0
+
+    return-object v0
+.end method
+
+.method public static getSuggestedSignatureAlgorithms(Ljava/security/PublicKey;IZZ)Ljava/util/List;
+    .registers 8
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "(",
+            "Ljava/security/PublicKey;",
+            "IZZ)",
+            "Ljava/util/List",
+            "<",
+            "Lcom/android/apksig/internal/apk/SignatureAlgorithm;",
+            ">;"
+        }
+    .end annotation
+
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/security/InvalidKeyException;
+        }
+    .end annotation
+
+    .line 80
+    invoke-static {p0, p1, p2, p3}, Lcom/android/apksig/internal/apk/v3/V3SchemeSigner;->getSuggestedSignatureAlgorithms(Ljava/security/PublicKey;IZZ)Ljava/util/List;
+
+    move-result-object v1
+
+    .line 84
+    invoke-interface {v1}, Ljava/util/List;->listIterator()Ljava/util/ListIterator;
+
+    move-result-object v2
+
+    :cond_8
+    :goto_8
+    invoke-interface {v2}, Ljava/util/Iterator;->hasNext()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_23
+
+    .line 85
+    invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/apk/SignatureAlgorithm;
+
+    .line 86
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/SignatureAlgorithm;->getContentDigestAlgorithm()Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;
+
+    move-result-object v0
+
+    const/4 v3, 0x0
+
+    invoke-static {v0, v3}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->isSupported(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;Z)Z
+
+    move-result v0
+
+    if-nez v0, :cond_8
+
+    .line 87
+    invoke-interface {v2}, Ljava/util/Iterator;->remove()V
+
+    goto :goto_8
+
+    .line 90
+    :cond_23
+    return-object v1
+.end method
+
+.method private static isSupported(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;Z)Z
+    .registers 4
+
+    const/4 v0, 0x0
+
+    .line 332
+    if-nez p0, :cond_4
+
+    .line 341
+    :cond_3
+    :goto_3
+    return v0
+
+    .line 335
+    :cond_4
+    sget-object v1, Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;->CHUNKED_SHA256:Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;
+
+    if-eq p0, v1, :cond_12
+
+    sget-object v1, Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;->CHUNKED_SHA512:Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;
+
+    if-eq p0, v1, :cond_12
+
+    if-eqz p1, :cond_3
+
+    sget-object v1, Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;->VERITY_CHUNKED_SHA256:Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;
+
+    if-ne p0, v1, :cond_3
+
+    .line 339
+    :cond_12
+    const/4 v0, 0x1
+
+    goto :goto_3
+.end method
+
+.method private static pickBestDigest(Ljava/util/List;)[B
+    .registers 7
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "(",
+            "Ljava/util/List",
+            "<",
+            "Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo$ContentDigest;",
+            ">;)[B"
+        }
+    .end annotation
+
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Ljava/security/SignatureException;
+        }
+    .end annotation
+
+    .line 291
+    if-eqz p0, :cond_8
+
+    invoke-interface {p0}, Ljava/util/List;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_10
+
+    .line 292
+    :cond_8
+    new-instance v0, Ljava/security/SignatureException;
+
+    const-string v1, "Should have at least one digest"
+
+    invoke-direct {v0, v1}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 295
+    :cond_10
+    const/4 v0, -0x1
+
+    .line 296
+    const/4 v2, 0x0
+
+    .line 297
+    invoke-interface {p0}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+
+    move-result-object v4
+
+    move v1, v0
+
+    move-object v3, v2
+
+    :cond_18
+    :goto_18
+    invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_44
+
+    invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo$ContentDigest;
+
+    .line 299
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo$ContentDigest;->getSignatureAlgorithmId()I
+
+    move-result v2
+
+    invoke-static {v2}, Lcom/android/apksig/internal/apk/SignatureAlgorithm;->findById(I)Lcom/android/apksig/internal/apk/SignatureAlgorithm;
+
+    move-result-object v2
+
+    .line 301
+    invoke-virtual {v2}, Lcom/android/apksig/internal/apk/SignatureAlgorithm;->getContentDigestAlgorithm()Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;
+
+    move-result-object v2
+
+    .line 302
+    const/4 v5, 0x1
+
+    invoke-static {v2, v5}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->isSupported(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;Z)Z
+
+    move-result v5
+
+    if-eqz v5, :cond_18
+
+    .line 305
+    invoke-static {v2}, Lcom/android/apksig/internal/apk/v4/V4SchemeSigner;->digestAlgorithmSortingOrder(Lcom/android/apksig/internal/apk/ContentDigestAlgorithm;)I
+
+    move-result v2
+
+    .line 306
+    if-ge v1, v2, :cond_18
+
+    .line 308
+    invoke-virtual {v0}, Lcom/android/apksig/internal/apk/ApkSigningBlockUtils$Result$SignerInfo$ContentDigest;->getValue()[B
+
+    move-result-object v0
+
+    move v1, v2
+
+    move-object v3, v0
+
+    goto :goto_18
+
+    .line 311
+    :cond_44
+    if-nez v3, :cond_4e
+
+    .line 312
+    new-instance v0, Ljava/security/SignatureException;
+
+    const-string v1, "Failed to find a supported digest in the source APK"
+
+    invoke-direct {v0, v1}, Ljava/security/SignatureException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    .line 314
+    :cond_4e
+    return-object v3
+.end method
