@@ -9,11 +9,12 @@
 # Java class files
 *.class
 
-# Generated files
+# Generated files & text resources
 bin/
 gen/
 out/
 .kotlin/
+*.txt
 
 # Gradle files
 .gradle/
@@ -27,18 +28,19 @@ local.properties
 
 # Patch Files
 *.patch
+
 # Android Studio Navigation editor temp files
 .navigation/
 
 # Android Studio captures folder
 captures/
 
-# IntelliJ
+# IntelliJ & IDE files
 *.iml
 .idea/
+.idea/render.experimental.xml
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
 *.jks
 *.keystore
 
@@ -59,10 +61,11 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 fastlane/readme.md
-.idea/render.experimental.xml
+
+# OS generated files
 .DS_Store
 
-# For users who uses android ide for building app
+# Mobile / Custom IDEs & Runners
 .androidide/
 /actions-runner
 release/
