@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
-package mod.agus.jcoderz.dx.rop.code;
+package mod.agus.jcoderz.dx.ssa;
 
-import mod.agus.jcoderz.dx.util.Bits;
 import mod.agus.jcoderz.dx.util.IntList;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
+
+import mod.agus.jcoderz.dx.rop.code.RegisterSpec;
+import mod.agus.jcoderz.dx.rop.code.RegisterSpecSet;
 
 /**
  * Code to figure out which local variables are active at which points in
- * a method.
+ * a method. Stolen and retrofitted from
+ * LocalVariableExtractor
+ *
+ * TODO remove this. Allow Rop-form LocalVariableInfo to be passed in,
+ * converted, and adapted through edge-splitting.
  */
-public final class LocalVariableExtractor {
+public class LocalVariableExtractor {
     /** {@code non-null;} method being extracted from */
-    private final mod.agus.jcoderz.dx.rop.code.RopMethod method;
+    private final mod.agus.jcoderz.dx.ssa.SsaMethod method;
 
     /** {@code non-null;} block list for the method */
-    private final BasicBlockList blocks;
+    private final ArrayList<mod.agus.jcoderz.dx.ssa.SsaBasicBlock> blocks;
 
     /** {@code non-null;} result in-progress */
     private final LocalVariableInfo resultInfo;
 
     /** {@code non-null;} work set indicating blocks needing to be processed */
-    private final int[] workSet;
+    private final BitSet workSet;
 
     /**
      * Extracts out all the local variable information from the given method.
@@ -42,7 +51,7 @@ public final class LocalVariableExtractor {
      * @param method {@code non-null;} the method to extract from
      * @return {@code non-null;} the extracted information
      */
-    public static LocalVariableInfo extract(mod.agus.jcoderz.dx.rop.code.RopMethod method) {
+    public static LocalVariableInfo extract(mod.agus.jcoderz.dx.ssa.SsaMethod method) {
         LocalVariableExtractor lve = new LocalVariableExtractor(method);
         return lve.doit();
     }
@@ -52,18 +61,17 @@ public final class LocalVariableExtractor {
      *
      * @param method {@code non-null;} the method to extract from
      */
-    private LocalVariableExtractor(RopMethod method) {
+    private LocalVariableExtractor(SsaMethod method) {
         if (method == null) {
             throw new NullPointerException("method == null");
         }
 
-        BasicBlockList blocks = method.getBlocks();
-        int maxLabel = blocks.getMaxLabel();
+        ArrayList<mod.agus.jcoderz.dx.ssa.SsaBasicBlock> blocks = method.getBlocks();
 
         this.method = method;
         this.blocks = blocks;
         this.resultInfo = new LocalVariableInfo(method);
-        this.workSet = Bits.makeBitSet(maxLabel);
+        this.workSet = new BitSet(blocks.size());
     }
 
     /**
@@ -72,11 +80,15 @@ public final class LocalVariableExtractor {
      * @return {@code non-null;} the extracted information
      */
     private LocalVariableInfo doit() {
-        for (int label = method.getFirstLabel();
-             label >= 0;
-             label = Bits.findFirst(workSet, 0)) {
-            Bits.clear(workSet, label);
-            processBlock(label);
+
+        //FIXME why is this needed here?
+        if (method.getRegCount() > 0 ) {
+            for (int bi = method.getEntryBlockIndex();
+                 bi >= 0;
+                 bi = workSet.nextSetBit(0)) {
+                workSet.clear(bi);
+                processBlock(bi);
+            }
         }
 
         resultInfo.setImmutable();
@@ -86,13 +98,19 @@ public final class LocalVariableExtractor {
     /**
      * Processes a single block.
      *
-     * @param label {@code >= 0;} label of the block to process
+     * @param blockIndex {@code >= 0;} block index of the block to process
      */
-    private void processBlock(int label) {
-        mod.agus.jcoderz.dx.rop.code.RegisterSpecSet primaryState = resultInfo.mutableCopyOfStarts(label);
-        BasicBlock block = blocks.labelToBlock(label);
-        InsnList insns = block.getInsns();
+    private void processBlock(int blockIndex) {
+        mod.agus.jcoderz.dx.rop.code.RegisterSpecSet primaryState
+                = resultInfo.mutableCopyOfStarts(blockIndex);
+        SsaBasicBlock block = blocks.get(blockIndex);
+        List<mod.agus.jcoderz.dx.ssa.SsaInsn> insns = block.getInsns();
         int insnSz = insns.size();
+
+        // The exit block has no insns and no successors
+        if (blockIndex == method.getExitBlockIndex()) {
+            return;
+        }
 
         /*
          * We may have to treat the last instruction specially: If it
@@ -101,8 +119,11 @@ public final class LocalVariableExtractor {
          * state *before* executing it to be what is merged into
          * exception targets.
          */
-        boolean canThrowDuringLastInsn = block.hasExceptionHandlers() &&
-            (insns.getLast().getResult() != null);
+        mod.agus.jcoderz.dx.ssa.SsaInsn lastInsn = insns.get(insnSz - 1);
+        boolean hasExceptionHandlers
+                = lastInsn.getOriginalRopInsn().getCatches().size() !=0 ;
+        boolean canThrowDuringLastInsn = hasExceptionHandlers
+                && (lastInsn.getResult() != null);
         int freezeSecondaryStateAt = insnSz - 1;
         mod.agus.jcoderz.dx.rop.code.RegisterSpecSet secondaryState = primaryState;
 
@@ -118,21 +139,17 @@ public final class LocalVariableExtractor {
                 primaryState = primaryState.mutableCopy();
             }
 
-            Insn insn = insns.get(i);
-            RegisterSpec result;
+            SsaInsn insn = insns.get(i);
+            mod.agus.jcoderz.dx.rop.code.RegisterSpec result;
 
             result = insn.getLocalAssignment();
 
             if (result == null) {
-                /*
-                 * If an assignment assigns over an existing local, make
-                 * sure to mark the local as going out of scope.
-                 */
+                // We may be nuking an existing local
 
                 result = insn.getResult();
 
-                if (result != null
-                        && primaryState.get(result.getReg()) != null) {
+                if (result != null && primaryState.get(result.getReg()) != null) {
                     primaryState.remove(primaryState.get(result.getReg()));
                 }
                 continue;
@@ -140,7 +157,7 @@ public final class LocalVariableExtractor {
 
             result = result.withSimpleType();
 
-            RegisterSpec already = primaryState.get(result);
+            mod.agus.jcoderz.dx.rop.code.RegisterSpec already = primaryState.get(result);
             /*
              * The equals() check ensures we only add new info if
              * the instruction causes a change to the set of
@@ -174,9 +191,9 @@ public final class LocalVariableExtractor {
          * where the start state for a block changes).
          */
 
-        IntList successors = block.getSuccessors();
+        IntList successors = block.getSuccessorList();
         int succSz = successors.size();
-        int primarySuccessor = block.getPrimarySuccessor();
+        int primarySuccessor = block.getPrimarySuccessorIndex();
 
         for (int i = 0; i < succSz; i++) {
             int succ = successors.get(i);
@@ -184,7 +201,7 @@ public final class LocalVariableExtractor {
                 primaryState : secondaryState;
 
             if (resultInfo.mergeStarts(succ, state)) {
-                Bits.set(workSet, succ);
+                workSet.set(succ);
             }
         }
     }
