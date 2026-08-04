@@ -1,0 +1,12 @@
+[
+  {
+    "code": "%3$s \u003d new HashMap\u003c\u003e();\r\n%3$s.put(\"apikey\", %5$s);\r\n%1$s.setHeaders(%3$s);\r\n%1$s.startRequestNetwork(RequestNetworkController.GET,%4$s.concat(\"/rest/v1/\".concat(%2$s.concat(\"?order\u003did.desc\"))) , \"\", _%1$s_request_listener);",
+    "imports": "",
+    "color": "#FF00A877",
+    "name": "getdata_rvs_bdware",
+    "typeName": "",
+    "palette": "87",
+    "type": " ",
+    "spec": "Get Data With Reverse - Network Request %m.RequestNetwork Table Name %s  Set Map %m.varMap  Set URL %s  Set API %s "
+  }
+]
